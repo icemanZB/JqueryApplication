@@ -3,44 +3,49 @@
 
     var Carousel = function (poster) {
         var self = this;
-        //保存单个旋转木马对象
-        this.poster = poster;
-        this.posterItemMain = poster.find("ul.poster-list");
-        this.nextBtn = poster.find("div.poster-next-btn");
+        // 保存单个旋转木马对象
+        this.poster = poster;  // 首先绑定到对象上面作为一个属性,方便下面使用
+        this.posterItemMain = poster.find("ul.poster-list");  // 找到ul
+        this.nextBtn = poster.find("div.poster-next-btn");  // 切换按钮
         this.prevBtn = poster.find("div.poster-prev-btn");
-        this.posterItems = poster.find("li.poster-item");
+        this.posterItems = poster.find("li.poster-item"); // 幻灯片的集合
         if (this.posterItems.size() % 2 == 0) {
             this.posterItemMain.append(this.posterItems.eq(0).clone());
             this.posterItems = this.posterItemMain.children();
         }
-        ;
-        this.posterFirstItem = this.posterItems.first();
+
+        this.posterFirstItem = this.posterItems.first();  // 第一帧图片
         this.posterLastItem = this.posterItems.last();
         this.rotateFlag = true;
-        //默认配置参数
+        // 默认配置参数
         this.setting = {
-            "width": 1000,			//幻灯片的宽度
-            "height": 270,				//幻灯片的高度
-            "posterWidth": 640,	//幻灯片第一帧的宽度
-            "posterHeight": 270,	//幻灯片第一帧的高度
-            "scale": 0.9,					//记录显示比例关系
-            "speed": 500,
+            "width": 1000,			// 幻灯片的宽度
+            "height": 270,		   // 幻灯片的高度,传高度的原因是要先初始化位置,不用等图片加载完在获取高度
+            "posterWidth": 640,	  // 幻灯片第一帧的宽度 方便求其他图片的排列位置 (图片的真实宽度)
+            "posterHeight": 270, // 幻灯片第一帧的高度
+            "scale": 0.9,		// 记录显示比例关系 (其他图片根据前一张图片的宽高的90%显示)
+            "speed": 500,      // 切换速度 (500毫秒)
             "autoPlay": false,
             "delay": 5000,
-            "verticalAlign": "middle" //top bottom
+            "verticalAlign": "middle" // top bottom 对齐方式
         };
+
+        // 如果已经配置了自定义的参数就使用自定义的,没有的话就使用默认配置参数
         $.extend(this.setting, this.getSetting());
 
-        //设置配置参数值
+        // 设置配置参数值
         this.setSettingValue();
+
+        // 设置剩余的帧的位置关系
         this.setPosterPos();
+
         //左旋转按钮
         this.nextBtn.click(function () {
             if (self.rotateFlag) {
                 self.rotateFlag = false;
                 self.carouseRotate("left");
             }
-            ;
+
         });
         //右旋转按钮
         this.prevBtn.click(function () {
@@ -48,7 +53,7 @@
                 self.rotateFlag = false;
                 self.carouseRotate("right");
             }
-            ;
+
         });
         //是否开启自动播放
         if (this.setting.autoPlay) {
@@ -60,9 +65,9 @@
             });
 
         }
-        ;
 
     };
+
     Carousel.prototype = {
         autoPlay: function () {
             var self = this;
@@ -72,11 +77,11 @@
 
         },
 
-        //旋转
+        // 旋转
         carouseRotate: function (dir) {
             var _this_ = this;
             var zIndexArr = [];
-            //左旋转
+            // 左旋转
             if (dir === "left") {
                 this.posterItems.each(function () {
                     var self = $(this),
@@ -131,29 +136,30 @@
                     $(this).css("zIndex", zIndexArr[i]);
                 });
             }
-            ;
+
         },
-        //设置剩余的帧的位置关系
+
+        // 设置剩余的帧的位置关系
         setPosterPos: function () {
             var self = this;
-            var sliceItems = this.posterItems.slice(1),
-                sliceSize = sliceItems.size() / 2,
-                rightSlice = sliceItems.slice(0, sliceSize),
+            var sliceItems = this.posterItems.slice(1),  // 获取剩余的li(帧)  从第一帧开始剩余的截取出来
+                sliceSize = sliceItems.length / 2, // 原来个数的一半
+                rightSlice = sliceItems.slice(0, sliceSize), // 右边剩余的个数  从0开始截取原来个数的一半
                 level = Math.floor(this.posterItems.size() / 2),
                 leftSlice = sliceItems.slice(sliceSize);
 
-            //设置右边帧的位置关系和宽度高度top
+            // 设置右边帧的位置关系和宽度高度top
             var rw = this.setting.posterWidth,
                 rh = this.setting.posterHeight,
                 gap = ((this.setting.width - this.setting.posterWidth) / 2) / level;
 
             var firstLeft = (this.setting.width - this.setting.posterWidth) / 2;
             var fixOffsetLeft = firstLeft + rw;
-            //设置左边位置关系
+            // 设置右边位置关系
             rightSlice.each(function (i) {
                 level--;
                 rw = rw * self.setting.scale;
-                rh = rh * self.setting.scale
+                rh = rh * self.setting.scale;
                 var j = i;
                 $(this).css({
                     zIndex: level,
@@ -195,26 +201,32 @@
             } else {
                 top = (this.setting.height - height) / 2;
             }
-            ;
+
             return top;
         },
-        //设置配置参数值去控制基本的宽度高度。。。
+
+        // 设置配置参数值去控制基本的宽度高度
         setSettingValue: function () {
+            // 设置整个幻灯片区域的宽度高度
             this.poster.css({
                 width: this.setting.width,
                 height: this.setting.height
             });
+
+            // 设置ul的宽度高度与幻灯片一样
             this.posterItemMain.css({
                 width: this.setting.width,
                 height: this.setting.height
             });
-            //计算上下切换按钮的宽度
+
+            // 计算上下切换按钮的宽度 (整个幻灯片的宽度-第一帧的宽度) / 2
             var w = (this.setting.width - this.setting.posterWidth) / 2;
-            //设置切换按钮的宽高，层级关系
+
+            // 设置切换按钮的宽高，层级关系
             this.nextBtn.css({
                 width: w,
-                height: this.setting.height,
-                zIndex: Math.ceil(this.posterItems.size() / 2)
+                height: this.setting.height,  // 高度就等于幻灯片区域的高度
+                zIndex: Math.ceil(this.posterItems.size() / 2)  // 幻灯片的总数 / 2 然后向上取整 zIndex为最高层级
             });
             this.prevBtn.css({
                 width: w,
@@ -222,32 +234,36 @@
                 zIndex: Math.ceil(this.posterItems.size() / 2)
             });
 
+            // 设置幻灯片第一帧的位置
             this.posterFirstItem.css({
                 width: this.setting.posterWidth,
                 height: this.setting.posterHeight,
-                left: w,
+                left: w,  /* left值就是切换按钮的宽度 */
                 top: 0,
-                zIndex: Math.floor(this.posterItems.size() / 2)
+                zIndex: Math.floor(this.posterItems.size() / 2) // 幻灯片的总数 / 2 然后向下取整,因为zIndex是从0开始的
             });
         },
-        //获取人工配置参数
-        getSetting: function () {
 
-            var setting = this.poster.attr("data-setting");
+        // 获取人工配置参数
+        getSetting: function () {
+            var setting = this.poster.attr("data-setting"); // 获取自定义节点属性
             if (setting && setting != "") {
                 return $.parseJSON(setting);
-            } else {
-                return {};
             }
-            ;
+            return {};
         }
 
     };
+
+    // 初始化页面中的集合
     Carousel.init = function (posters) {
-        var _this_ = this;
+        var _this = this;
         posters.each(function () {
-            new _this_($(this));
+            new _this($(this));
         });
     };
+
+    // 由于自身是个闭包,在外部无法访问到,所以挂在到window对象上
     window["Carousel"] = Carousel;
+
 })(jQuery);

@@ -8,6 +8,9 @@
     <script type="text/javascript" src="carousel.js"></script>
 </head>
 <body>
+<!-- setting 配置参数传递的方式不使用js传参数的方式,因为是面向对象的形式,如果页面中有两个这样的插件,那么循环初始化的时候始终是配置的
+一次达不到每一个插件是独立的效果,所以使用淘宝配置参数的方式自定义属性。插件会每一次都获取页面上的自定义属性,那么获取到的参数都是不一样的
+那么就可以达到插件独立存在,格式需要注意必须是正确的json,属性需要加双引号 -->
 <div class="J_Poster poster-main" data-setting='{
                                                 "width":1000,
                                                 "height":270,
